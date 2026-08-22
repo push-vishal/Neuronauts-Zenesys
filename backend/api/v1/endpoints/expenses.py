@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status
 from backend.schemas.procurement import ExpenseSubmissionSchema
+from backend.services.supabase_service import SupabaseDatabaseService
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
 
@@ -7,11 +8,15 @@ router = APIRouter(prefix="/expenses", tags=["Expenses"])
 def submit_expense(expense: ExpenseSubmissionSchema):
     """
     Endpoint for employees to submit expenses, project cost allocations, 
-    and track reimbursement status.
+    and store record in Supabase DB.
     """
-    # For MVP hackathon scope, we return a structured success confirmation
+    expense_dict = expense.model_dump()
+    
+    # Save to Supabase Database
+    saved_record = SupabaseDatabaseService.save_expense(expense_dict)
+
     return {
         "status": "success",
-        "message": "Expense submitted successfully and queued for finance review.",
-        "data": expense.model_dump()
+        "message": "Expense submitted successfully and saved in Supabase database.",
+        "data": saved_record
     }
