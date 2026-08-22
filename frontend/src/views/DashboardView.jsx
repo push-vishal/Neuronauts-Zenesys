@@ -1,32 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { DollarSign, CreditCard, FolderKanban, FileText, Receipt, Sparkles, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { DollarSign, CreditCard, FolderKanban, Sparkles, AlertCircle, ArrowUpRight } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function DashboardView({ onNavigate }) {
-  const [loading, setLoading] = useState(true);
   const [projectsData, setProjectsData] = useState(null);
-  const [posData, setPosData] = useState([]);
 
   useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const projRes = await axios.get('/api/v1/projects/').catch(() => ({ data: { projects: [] } }));
+        setProjectsData(projRes.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchDashboardData();
   }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      const [projRes, poRes] = await Promise.all([
-        axios.get('/api/v1/projects/').catch(() => ({ data: { projects: [] } })),
-        axios.get('/api/v1/procurement/pos').catch(() => ({ data: { purchase_orders: [] } }))
-      ]);
-
-      setProjectsData(projRes.data);
-      setPosData(poRes.data.purchase_orders || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const projects = projectsData?.projects || [];
   const totalSpend = projectsData?.total_spend || 0;

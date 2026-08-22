@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ShoppingCart, TrendingUp, Plus, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { ShoppingCart, TrendingUp, Plus } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function ProcurementView() {
@@ -10,19 +10,27 @@ export default function ProcurementView() {
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
-    fetchPOs();
-  }, []);
+    let ignore = false;
+    const fetchPOs = async () => {
+      try {
+        const res = await axios.get('/api/v1/procurement/pos');
+        if (!ignore) {
+          setPos(res.data.purchase_orders || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch POs', err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const fetchPOs = async () => {
-    try {
-      const res = await axios.get('/api/v1/procurement/pos');
-      setPos(res.data.purchase_orders || []);
-    } catch (err) {
-      console.error('Failed to fetch POs', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchPOs();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleCreatePO = async (e) => {
     e.preventDefault();
@@ -33,7 +41,8 @@ export default function ProcurementView() {
       });
       setMessage(res.data.message);
       setPoForm({ po_number: '', vendor_name: '', total_amount: '' });
-      fetchPOs();
+      const refreshRes = await axios.get('/api/v1/procurement/pos');
+      setPos(refreshRes.data.purchase_orders || []);
     } catch (err) {
       console.error(err);
       setMessage('Failed to create Purchase Order.');

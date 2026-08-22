@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { DollarSign, Plus, Receipt, Link as LinkIcon } from 'lucide-react';
+import { DollarSign, Plus, Link as LinkIcon } from 'lucide-react';
 import { uploadExpenseReceipt } from '../lib/supabaseClient';
 import EmptyState from '../components/EmptyState';
 

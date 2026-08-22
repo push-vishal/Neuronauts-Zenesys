@@ -1,5 +1,4 @@
-import React from 'react';
-import { Award, Sparkles } from 'lucide-react';
+import { Award } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function RecommendationsView() {

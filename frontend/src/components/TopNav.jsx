@@ -1,5 +1,4 @@
-import React from 'react';
-import { Search, Bell, Building, User, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Search, Bell, Building, ChevronRight } from 'lucide-react';
 
 export default function TopNav({ activeNav, orgName, onOpenOrgModal, searchQuery, onSearchChange }) {
   const getNavTitle = (nav) => {

@@ -1,8 +1,7 @@
-import React from 'react';
 import { 
   Activity, ArrowRight, CheckCircle2, Shield, Sparkles, 
-  Workflow, Database, Cpu, Lock, Layers, Zap, ShoppingCart, 
-  FileText, DollarSign, FolderKanban, Award, Users, ChevronRight, BarChart3
+  Workflow, Database, Cpu, Lock, Layers, ShoppingCart, 
+  FileText, DollarSign, FolderKanban, Award, Users, BarChart3
 } from 'lucide-react';
 
 export default function LandingPage({ onNavigateToApp, onOpenAuth }) {

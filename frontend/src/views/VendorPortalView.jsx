@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { Store, Upload, CheckCircle2, RefreshCw, FileText } from 'lucide-react';
 import { uploadInvoiceDocument } from '../lib/supabaseClient';

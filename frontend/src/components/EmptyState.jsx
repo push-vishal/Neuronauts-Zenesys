@@ -1,4 +1,3 @@
-import React from 'react';
 import { Inbox, Plus } from 'lucide-react';
 
 export default function EmptyState({ 

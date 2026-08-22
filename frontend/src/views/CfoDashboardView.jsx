@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shield, Award, Sparkles } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 

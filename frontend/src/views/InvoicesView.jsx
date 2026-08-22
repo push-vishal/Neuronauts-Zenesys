@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { Upload, FileText, CheckCircle2, ShieldAlert, AlertTriangle, Eye, Link as LinkIcon, RefreshCw } from 'lucide-react';
+import { Upload, FileText, ShieldAlert, Eye, RefreshCw } from 'lucide-react';
 import { uploadInvoiceDocument } from '../lib/supabaseClient';
 import EmptyState from '../components/EmptyState';
 
 export default function InvoicesView() {
-  const [file, setFile] = useState(null);
   const [uploadStage, setUploadStage] = useState(''); // Uploading..., Extracting..., Validating..., Ready for Review
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,7 +15,6 @@ export default function InvoicesView() {
 
   const handleUpload = async (fileToUpload) => {
     if (!fileToUpload) return;
-    setFile(fileToUpload);
     setLoading(true);
     setError(null);
 

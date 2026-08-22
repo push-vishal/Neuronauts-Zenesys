@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { CreditCard, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { CreditCard } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function PaymentsView() {
-  const [payments, setPayments] = useState([]);
+  const [payments] = useState([]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

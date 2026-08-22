@@ -1,7 +1,6 @@
-import React from 'react';
 import { Briefcase, Building2, BarChart3, UserCheck, Shield, Store } from 'lucide-react';
 
-export const ROLES = [
+const ROLES = [
   { id: 'procurement_manager', label: 'Procurement Manager', icon: Briefcase, color: '#149ECA', desc: 'PO creation & vendor price drift analytics' },
   { id: 'finance_team', label: 'Finance Team', icon: Building2, color: '#16A34A', desc: 'Invoices, 3-way matching & approvals' },
   { id: 'project_manager', label: 'Project Manager', icon: BarChart3, color: '#D97706', desc: 'Project budgets & overrun detection' },

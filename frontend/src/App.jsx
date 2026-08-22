@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import Sidebar from './components/Sidebar';
 import TopNav from './components/TopNav';
@@ -28,7 +28,11 @@ export default function App() {
   const [orgDetails, setOrgDetails] = useState(() => {
     const saved = localStorage.getItem('finova_org');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // Fall back to default
+      }
     }
     return {
       name: 'Neuronauts Global Enterprise',

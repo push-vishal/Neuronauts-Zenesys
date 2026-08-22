@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Receipt, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Receipt } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function ReimbursementsView() {
-  const [reimbursements, setReimbursements] = useState([]);
+  const [reimbursements] = useState([]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

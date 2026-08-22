@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Users, Plus, Search, Eye } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
@@ -148,6 +148,25 @@ export default function VendorsView() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Vendor Detail Drawer */}
+      {selectedVendor && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(23, 32, 51, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'flex-end', zIndex: 100 }}>
+          <div style={{ width: '440px', background: '#FFFFFF', borderLeft: '1px solid #E2E8F0', height: '100%', padding: '24px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#172033', margin: 0 }}>Vendor Profile</h3>
+              <button onClick={() => setSelectedVendor(null)} className="btn-secondary" style={{ padding: '4px 8px' }}>Close</button>
+            </div>
+            <div className="card" style={{ marginBottom: '16px' }}>
+              <span className="badge badge-info" style={{ marginBottom: '8px' }}>{selectedVendor.category}</span>
+              <h4 style={{ fontSize: '18px', fontWeight: 700, color: '#172033', margin: '4px 0 12px 0' }}>{selectedVendor.name}</h4>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 4px 0' }}>Total Spend: <strong style={{ color: '#172033' }}>₹ {selectedVendor.total_spend.toLocaleString('en-IN')}</strong></p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 4px 0' }}>Open Invoices: <strong style={{ color: '#172033' }}>{selectedVendor.open_invoices}</strong></p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>Performance Rating: <strong style={{ color: '#149ECA' }}>{selectedVendor.performance}</strong></p>
+            </div>
+          </div>
         </div>
       )}
     </div>

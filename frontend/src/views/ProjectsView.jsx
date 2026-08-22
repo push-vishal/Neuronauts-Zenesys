@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FolderKanban, Plus, Eye } from 'lucide-react';
+import { FolderKanban, Eye } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function ProjectsView() {
@@ -9,19 +9,27 @@ export default function ProjectsView() {
   const [selectedProject, setSelectedProject] = useState(null);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    let ignore = false;
+    const fetchProjects = async () => {
+      try {
+        const res = await axios.get('/api/v1/projects/');
+        if (!ignore) {
+          setProjects(res.data.projects || []);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const fetchProjects = async () => {
-    try {
-      const res = await axios.get('/api/v1/projects/');
-      setProjects(res.data.projects || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProjects();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -31,7 +39,9 @@ export default function ProjectsView() {
         </p>
       </div>
 
-      {projects.length === 0 ? (
+      {loading ? (
+        <p style={{ color: '#64748B' }}>Loading projects...</p>
+      ) : projects.length === 0 ? (
         <EmptyState icon={FolderKanban} title="No projects yet" description="Create a project to start tracking budget and costs." />
       ) : (
         <div className="data-table-container">
@@ -89,6 +99,24 @@ export default function ProjectsView() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Project Detail Drawer */}
+      {selectedProject && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(23, 32, 51, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'flex-end', zIndex: 100 }}>
+          <div style={{ width: '440px', background: '#FFFFFF', borderLeft: '1px solid #E2E8F0', height: '100%', padding: '24px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#172033', margin: 0 }}>Project Details</h3>
+              <button onClick={() => setSelectedProject(null)} className="btn-secondary" style={{ padding: '4px 8px' }}>Close</button>
+            </div>
+            <div className="card" style={{ marginBottom: '16px' }}>
+              <span style={{ fontSize: '11px', color: '#149ECA', fontFamily: 'monospace', fontWeight: 600 }}>{selectedProject.project_code}</span>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#172033', margin: '4px 0 12px 0' }}>{selectedProject.project_name}</h4>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 4px 0' }}>Budget: <strong style={{ color: '#172033' }}>₹ {(selectedProject.budget_amount || 0).toLocaleString('en-IN')}</strong></p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>Actual Spend: <strong style={{ color: '#172033' }}>₹ {(selectedProject.actual_spend || 0).toLocaleString('en-IN')}</strong></p>
+            </div>
+          </div>
         </div>
       )}
     </div>

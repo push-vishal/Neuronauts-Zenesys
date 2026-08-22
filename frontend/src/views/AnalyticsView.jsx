@@ -1,5 +1,4 @@
-import React from 'react';
-import { LineChart, BarChart3, TrendingUp } from 'lucide-react';
+import { LineChart } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function AnalyticsView() {

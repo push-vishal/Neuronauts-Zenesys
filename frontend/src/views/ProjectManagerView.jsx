@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BarChart3, AlertTriangle, DollarSign } from 'lucide-react';
+import { BarChart3, AlertTriangle } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function ProjectManagerView() {
@@ -8,19 +8,27 @@ export default function ProjectManagerView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProjectCosts();
-  }, []);
+    let ignore = false;
+    const fetchProjectCosts = async () => {
+      try {
+        const res = await axios.get('/api/v1/projects/');
+        if (!ignore) {
+          setProjectsData(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch project costs', err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const fetchProjectCosts = async () => {
-    try {
-      const res = await axios.get('/api/v1/projects/');
-      setProjectsData(res.data);
-    } catch (err) {
-      console.error('Failed to fetch project costs', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProjectCosts();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   if (loading) return <p style={{ color: '#64748B' }}>Loading project cost intelligence...</p>;
 
