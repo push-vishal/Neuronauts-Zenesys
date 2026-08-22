@@ -1,9 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Receipt } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function ReimbursementsView() {
-  const [reimbursements] = useState([]);
+  const [reimbursements, setReimbursements] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadReimbursements() {
+      try {
+        const res = await axios.get('/api/v1/expenses/');
+        if (!ignore && res.data?.expenses) {
+          const mapped = res.data.expenses.map(exp => ({
+            employee: exp.employee_name,
+            project: exp.project_name,
+            expense: exp.category,
+            amount: exp.amount || 0,
+            submission_date: exp.date || '2026-08-21',
+            approval_status: exp.status === 'Approved' ? 'Approved' : 'Pending Review',
+            payment_status: exp.reimbursement_status || 'Pending'
+          }));
+          setReimbursements(mapped);
+        }
+      } catch (err) {
+        console.error('Error fetching reimbursements', err);
+      }
+    }
+    loadReimbursements();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

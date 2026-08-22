@@ -29,3 +29,27 @@ def create_purchase_order(po: PurchaseOrderSchema):
         "message": f"Purchase Order {po.po_number} created successfully.",
         "data": saved_po
     }
+
+@router.get("/vendors", status_code=status.HTTP_200_OK)
+def list_vendors():
+    """
+    Returns list of vendors with dynamic spend & performance metrics.
+    """
+    vendors = SupabaseDatabaseService.get_vendors()
+    return {
+        "status": "success",
+        "count": len(vendors),
+        "vendors": vendors
+    }
+
+@router.post("/vendors", status_code=status.HTTP_201_CREATED)
+def add_vendor(vendor: dict):
+    """
+    Adds a new vendor profile.
+    """
+    saved_v = SupabaseDatabaseService.create_vendor(vendor)
+    return {
+        "status": "success",
+        "message": f"Vendor {vendor.get('name')} registered successfully.",
+        "vendor": saved_v
+    }

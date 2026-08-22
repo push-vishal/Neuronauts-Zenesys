@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, Form, status
 from backend.services.gemini_service import GeminiService
@@ -6,6 +7,18 @@ from backend.services.recommendation_service import RecommendationService
 from backend.services.supabase_service import SupabaseDatabaseService
 
 router = APIRouter(prefix="/invoices", tags=["Invoices"])
+
+@router.get("/", status_code=status.HTTP_200_OK)
+def list_invoices():
+    """
+    Returns all parsed and verified invoices.
+    """
+    invoices = SupabaseDatabaseService.get_invoices()
+    return {
+        "status": "success",
+        "count": len(invoices),
+        "invoices": invoices
+    }
 
 @router.post("/upload", status_code=status.HTTP_200_OK)
 async def upload_and_audit_invoice(
@@ -77,15 +90,21 @@ async def upload_and_audit_invoice(
             "description": rec_result["recommendation"]
         })
 
-    # 5. Persist record into Supabase PostgreSQL database
+    # 5. Persist record into Database & update Project spend
+    match_status_label = "MATCHED" if len(anomalies) == 0 else "PO_MISMATCH"
     db_record = SupabaseDatabaseService.save_invoice({
-        "invoice_number": parsed_invoice.get("invoice_number", "INV-2026-0892"),
+        "invoice_number": parsed_invoice.get("invoice_number", f"INV-{int(time.time())}"),
         "vendor_name": parsed_invoice.get("vendor_name", "Acme Hardware & Tech Solutions"),
+        "project_code": "PRJ-NEBULA",
         "total_amount": float(parsed_invoice.get("total_amount", 4250.00)),
+        "invoice_date": time.strftime("%Y-%m-%d"),
+        "due_date": time.strftime("%Y-%m-%d", time.localtime(time.time() + 14 * 86400)),
+        "match_status": match_status_label,
+        "payment_status": "Pending",
         "storage_url": storage_url or "",
         "anomalies_detected": len(anomalies),
-        "anomalies_json": anomalies,
-        "parsed_invoice_json": parsed_invoice
+        "anomalies": anomalies,
+        "parsed_invoice": parsed_invoice
     })
 
     return {

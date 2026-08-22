@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Users, Plus, Search, Eye } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
@@ -8,24 +9,53 @@ export default function VendorsView() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
 
-  // Initial real vendor state (starts empty if no database records added yet)
+  // Initial real vendor state populated dynamically from backend
   const [vendors, setVendors] = useState([]);
   const [newVendor, setNewVendor] = useState({ name: '', category: 'Hardware & Supplies', email: '' });
 
-  const handleAddVendor = (e) => {
-    e.preventDefault();
-    const vendorObj = {
-      id: `v_${Date.now()}`,
-      name: newVendor.name,
-      category: newVendor.category,
-      total_spend: 0.00,
-      open_invoices: 0,
-      performance: 'Not Evaluated',
-      status: 'Active'
+  useEffect(() => {
+    let ignore = false;
+    async function loadVendors() {
+      try {
+        const res = await axios.get('/api/v1/procurement/vendors');
+        if (!ignore && res.data?.vendors) {
+          setVendors(res.data.vendors);
+        }
+      } catch (err) {
+        console.error('Error fetching vendors', err);
+      }
+    }
+    loadVendors();
+    return () => {
+      ignore = true;
     };
-    setVendors([vendorObj, ...vendors]);
-    setNewVendor({ name: '', category: 'Hardware & Supplies', email: '' });
-    setShowAddModal(false);
+  }, []);
+
+  const handleAddVendor = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/api/v1/procurement/vendors', {
+        name: newVendor.name,
+        category: newVendor.category,
+        email: newVendor.email,
+        total_spend: 0.0,
+        open_invoices: 0
+      });
+      const saved = res.data?.vendor || {
+        id: `v_${Date.now()}`,
+        name: newVendor.name,
+        category: newVendor.category,
+        total_spend: 0.00,
+        open_invoices: 0,
+        performance: 'Not Evaluated',
+        status: 'Active'
+      };
+      setVendors([saved, ...vendors]);
+      setNewVendor({ name: '', category: 'Hardware & Supplies', email: '' });
+      setShowAddModal(false);
+    } catch (err) {
+      console.error('Error creating vendor', err);
+    }
   };
 
   const filteredVendors = vendors.filter(v => {

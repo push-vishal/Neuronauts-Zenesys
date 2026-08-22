@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { DollarSign, Plus, Link as LinkIcon } from 'lucide-react';
 import { uploadExpenseReceipt } from '../lib/supabaseClient';
@@ -17,6 +17,24 @@ export default function ExpensesView() {
   });
   const [receiptFile, setReceiptFile] = useState(null);
   const [expenses, setExpenses] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadExpenses() {
+      try {
+        const res = await axios.get('/api/v1/expenses/');
+        if (!ignore && res.data?.expenses) {
+          setExpenses(res.data.expenses);
+        }
+      } catch (err) {
+        console.error('Error loading expenses', err);
+      }
+    }
+    loadExpenses();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

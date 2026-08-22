@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FolderKanban, Eye } from 'lucide-react';
+import { FolderKanban, Eye, Plus } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function ProjectsView() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProject, setNewProject] = useState({ project_code: '', project_name: '', budget_amount: '' });
 
   useEffect(() => {
     let ignore = false;
@@ -31,13 +33,84 @@ export default function ProjectsView() {
     };
   }, []);
 
+  const handleCreateProject = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/api/v1/projects/', {
+        project_code: newProject.project_code || `PRJ-${Math.floor(Math.random() * 9000) + 1000}`,
+        project_name: newProject.project_name,
+        budget_amount: parseFloat(newProject.budget_amount) || 100000
+      });
+      if (res.data?.project) {
+        setProjects([...projects, res.data.project]);
+      }
+      setNewProject({ project_code: '', project_name: '', budget_amount: '' });
+      setShowAddModal(false);
+    } catch (err) {
+      console.error('Error creating project', err);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-          Track project budget allocations and actual costs derived from transaction records.
+          Track project budget allocations and actual costs derived dynamically from transaction records.
         </p>
+        <button onClick={() => setShowAddModal(true)} className="btn-primary">
+          <Plus size={16} />
+          <span>New Project</span>
+        </button>
       </div>
+
+      {showAddModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(23, 32, 51, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div className="card" style={{ width: '100%', maxWidth: '420px', background: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#172033', marginBottom: '16px' }}>Create New Project</h3>
+            <form onSubmit={handleCreateProject} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Project Name</label>
+                <input
+                  type="text"
+                  required
+                  value={newProject.project_name}
+                  onChange={(e) => setNewProject({ ...newProject, project_name: e.target.value })}
+                  style={{ width: '100%', padding: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', color: '#172033', fontSize: '13px' }}
+                  placeholder="e.g. AI Workflow Optimization"
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Project Code</label>
+                  <input
+                    type="text"
+                    value={newProject.project_code}
+                    onChange={(e) => setNewProject({ ...newProject, project_code: e.target.value })}
+                    style={{ width: '100%', padding: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', color: '#172033', fontSize: '13px' }}
+                    placeholder="PRJ-AI"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Budget (₹)</label>
+                  <input
+                    type="number"
+                    step="1000"
+                    required
+                    value={newProject.budget_amount}
+                    onChange={(e) => setNewProject({ ...newProject, budget_amount: e.target.value })}
+                    style={{ width: '100%', padding: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', color: '#172033', fontSize: '13px' }}
+                    placeholder="250000"
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Create Project</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p style={{ color: '#64748B' }}>Loading projects...</p>

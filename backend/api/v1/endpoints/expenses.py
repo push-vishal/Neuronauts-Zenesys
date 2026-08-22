@@ -4,6 +4,18 @@ from backend.services.supabase_service import SupabaseDatabaseService
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
 
+@router.get("/", status_code=status.HTTP_200_OK)
+def list_expenses():
+    """
+    Returns all submitted employee expenses.
+    """
+    expenses = SupabaseDatabaseService.get_expenses()
+    return {
+        "status": "success",
+        "count": len(expenses),
+        "expenses": expenses
+    }
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def submit_expense(expense: ExpenseSubmissionSchema):
     """

@@ -104,13 +104,21 @@ export default function ProcurementView() {
         <div className="card">
           <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#172033', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <TrendingUp color="#149ECA" size={18} />
-            <span>Procurement Intelligence</span>
+            <span>Procurement Intelligence Engine</span>
           </h3>
-          <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-            <p style={{ fontSize: '12px', color: '#149ECA', fontWeight: 600, margin: '0 0 4px 0' }}>COST-SAVING ANALYSIS</p>
-            <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', margin: 0 }}>
-              FINOVA will compare purchase order pricing against your organizational purchase history once sufficient transaction records exist.
-            </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+              <p style={{ fontSize: '12px', color: '#149ECA', fontWeight: 700, margin: '0 0 4px 0' }}>AUTOMATED 3-WAY MATCHING</p>
+              <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.4', margin: 0 }}>
+                Every issued PO is cross-referenced with vendor invoices and goods receipt notes (GRN) to catch line-item discrepancies before payment.
+              </p>
+            </div>
+            <div style={{ background: '#E0F2FE', padding: '12px 14px', borderRadius: '6px', border: '1px solid #7DD3FC' }}>
+              <p style={{ fontSize: '12px', color: '#0369A1', fontWeight: 700, margin: '0 0 2px 0' }}>BENCHMARK DRIFT DETECTION</p>
+              <p style={{ fontSize: '12px', color: '#0369A1', margin: 0 }}>
+                Alerts triggered automatically if quoted vendor rates exceed historical baseline by &gt;5%.
+              </p>
+            </div>
           </div>
         </div>
       </div>

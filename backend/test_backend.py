@@ -140,5 +140,46 @@ class TestFinovaBackend(unittest.TestCase):
         self.assertIn("total_budget", data)
         self.assertIn("total_encumbered_pos", data)
 
+    def test_api_dynamic_invoices_and_expenses_listing(self):
+        inv_res = client.get("/api/v1/invoices/")
+        self.assertEqual(inv_res.status_code, 200)
+        self.assertIn("invoices", inv_res.json())
+
+        exp_res = client.get("/api/v1/expenses/")
+        self.assertEqual(exp_res.status_code, 200)
+        self.assertIn("expenses", exp_res.json())
+
+    def test_api_dynamic_vendors_listing_and_creation(self):
+        v_list = client.get("/api/v1/procurement/vendors")
+        self.assertEqual(v_list.status_code, 200)
+        self.assertIn("vendors", v_list.json())
+
+        v_create = client.post("/api/v1/procurement/vendors", json={
+            "name": "Datadog Cloud Observability",
+            "category": "Software & Cloud Services",
+            "email": "enterprise@datadog.com"
+        })
+        self.assertEqual(v_create.status_code, 201)
+        self.assertEqual(v_create.json()["status"], "success")
+
+    def test_api_dynamic_projects_creation(self):
+        p_create = client.post("/api/v1/projects/", json={
+            "project_code": "PRJ-QUANTUM",
+            "project_name": "Quantum AI Infrastructure",
+            "budget_amount": 500000.0
+        })
+        self.assertEqual(p_create.status_code, 201)
+        self.assertEqual(p_create.json()["status"], "success")
+
+    def test_api_dynamic_recommendations_and_analytics(self):
+        rec_res = client.get("/api/v1/recommendations/")
+        self.assertEqual(rec_res.status_code, 200)
+        self.assertIn("recommendations", rec_res.json())
+
+        ana_res = client.get("/api/v1/analytics/")
+        self.assertEqual(ana_res.status_code, 200)
+        self.assertIn("categories", ana_res.json())
+        self.assertIn("monthly_trend", ana_res.json())
+
 if __name__ == "__main__":
     unittest.main()

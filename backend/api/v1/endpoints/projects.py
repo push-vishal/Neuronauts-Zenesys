@@ -22,3 +22,15 @@ def get_project_costs():
         "overbudget_projects_count": overbudget_count,
         "projects": projects
     }
+
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_project(project: dict):
+    """
+    Creates a new project budget allocation.
+    """
+    saved_p = SupabaseDatabaseService.create_project(project)
+    return {
+        "status": "success",
+        "message": f"Project {saved_p.get('project_name')} created successfully.",
+        "project": saved_p
+    }

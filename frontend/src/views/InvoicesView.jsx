@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Upload, FileText, ShieldAlert, Eye, RefreshCw } from 'lucide-react';
 import { uploadInvoiceDocument } from '../lib/supabaseClient';
@@ -10,8 +10,26 @@ export default function InvoicesView() {
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
-  // Invoices list state (starts empty if no database records processed yet)
+  // Invoices list state populated dynamically from backend
   const [invoices, setInvoices] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadInvoices() {
+      try {
+        const res = await axios.get('/api/v1/invoices/');
+        if (!ignore && res.data?.invoices) {
+          setInvoices(res.data.invoices);
+        }
+      } catch (err) {
+        console.error('Error fetching invoices', err);
+      }
+    }
+    loadInvoices();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleUpload = async (fileToUpload) => {
     if (!fileToUpload) return;

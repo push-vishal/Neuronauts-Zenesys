@@ -1,9 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { CreditCard } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 
 export default function PaymentsView() {
-  const [payments] = useState([]);
+  const [payments, setPayments] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadPayments() {
+      try {
+        const res = await axios.get('/api/v1/invoices/');
+        if (!ignore && res.data?.invoices) {
+          const mapped = res.data.invoices.map(inv => ({
+            invoice: inv.invoice_number,
+            vendor: inv.vendor_name,
+            amount: inv.total_amount || 0,
+            due_date: inv.due_date || '2026-09-04',
+            payment_date: inv.payment_status === 'Paid' ? inv.invoice_date : '—',
+            status: inv.payment_status || 'Pending'
+          }));
+          setPayments(mapped);
+        }
+      } catch (err) {
+        console.error('Error fetching payments', err);
+      }
+    }
+    loadPayments();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
