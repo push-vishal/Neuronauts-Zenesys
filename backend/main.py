@@ -8,6 +8,7 @@ from backend.api.v1.endpoints.invoices import router as invoices_router
 from backend.api.v1.endpoints.expenses import router as expenses_router
 from backend.api.v1.endpoints.projects import router as projects_router
 from backend.api.v1.endpoints.procurement import router as procurement_router
+from backend.api.v1.endpoints.erp import router as erp_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,3 +46,4 @@ app.include_router(invoices_router, prefix="/api/v1")
 app.include_router(expenses_router, prefix="/api/v1")
 app.include_router(projects_router, prefix="/api/v1")
 app.include_router(procurement_router, prefix="/api/v1")
+app.include_router(erp_router, prefix="/api/v1")

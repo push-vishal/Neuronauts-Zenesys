@@ -11,6 +11,7 @@ export default function TopNav({ activeNav, orgName, onOpenOrgModal, searchQuery
       expenses: 'Expenses',
       reimbursements: 'Reimbursements',
       payments: 'Payments',
+      erp: 'ERP & Oracle NetSuite',
       analytics: 'Analytics',
       ai_insights: 'AI Insights',
       recommendations: 'Recommendations',

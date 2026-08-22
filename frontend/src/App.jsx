@@ -14,6 +14,7 @@ import InvoicesView from './views/InvoicesView';
 import ExpensesView from './views/ExpensesView';
 import ReimbursementsView from './views/ReimbursementsView';
 import PaymentsView from './views/PaymentsView';
+import ErpIntegrationView from './views/ErpIntegrationView';
 import AnalyticsView from './views/AnalyticsView';
 import RecommendationsView from './views/RecommendationsView';
 
@@ -147,6 +148,7 @@ export default function App() {
           {activeNav === 'expenses' && <ExpensesView />}
           {activeNav === 'reimbursements' && <ReimbursementsView />}
           {activeNav === 'payments' && <PaymentsView />}
+          {activeNav === 'erp' && <ErpIntegrationView />}
           {activeNav === 'analytics' && <AnalyticsView />}
           {activeNav === 'ai_insights' && <RecommendationsView />}
           {activeNav === 'recommendations' && <RecommendationsView />}

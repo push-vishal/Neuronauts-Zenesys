@@ -1,7 +1,7 @@
 import { 
   LayoutDashboard, Users, FolderKanban, ShoppingCart, 
   FileText, DollarSign, CreditCard, Receipt, LineChart, 
-  Sparkles, Award, Building, Settings, ChevronLeft, ChevronRight, Activity
+  Sparkles, Award, Building, Settings, ChevronLeft, ChevronRight, Activity, Server
 } from 'lucide-react';
 
 export default function Sidebar({ isCollapsed, onToggleCollapse, activeNav, onSelectNav }) {
@@ -22,6 +22,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, activeNav, onSe
         { id: 'expenses', label: 'Expenses', icon: DollarSign },
         { id: 'reimbursements', label: 'Reimbursements', icon: Receipt },
         { id: 'payments', label: 'Payments', icon: CreditCard },
+        { id: 'erp', label: 'ERP & NetSuite', icon: Server },
       ]
     },
     {
