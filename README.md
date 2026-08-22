@@ -306,23 +306,30 @@ Oracle NetSuite / ERP Integration
 
 ## 🔒 How Security & Authentication Work
 
-[ Browser Client ]
-       │  JWT Bearer Token (Supabase Auth)
-       ↓
-[ FastAPI Backend ]
-       │  API Secrets isolated in Server Memory (.env)
-       ├─────────────────────────┬─────────────────────────┐
-       ↓                         ↓                         ↓
-[ Supabase PostgreSQL ]    [ Gemini 2.0 AI ]      [ Oracle NetSuite ]
- Row-Level Security (RLS)   Google GenAI SDK       Token-Based Auth (TBA)
- & Encrypted Storage        Encrypted Transit      OAuth 1.0a HMAC-SHA256
- 
+```mermaid
+flowchart TD
+    A["🌐 Browser Client"] -->|"JWT Bearer Token (Supabase Auth)"| B["⚡ FastAPI Backend<br/>🔑 API Secrets in Server Memory (.env)"]
+    B --> C["🗄️ Supabase PostgreSQL"]
+    B --> D["🤖 Gemini 2.0 AI"]
+    B --> E["📊 Oracle NetSuite"]
 
-🌟 Vision
+    C -.->|"Row-Level Security (RLS)"| C1["Token-Based Auth &<br/>Encrypted Storage"]
+    D -.->|"Google GenAI SDK"| D1["Encrypted Transit"]
+    E -.->|"OAuth 1.0a"| E1["HMAC-SHA256"]
+
+    style A fill:#1e293b,stroke:#38bdf8,color:#fff
+    style B fill:#1e293b,stroke:#38bdf8,color:#fff
+    style C fill:#0f172a,stroke:#22c55e,color:#fff
+    style D fill:#0f172a,stroke:#a855f7,color:#fff
+    style E fill:#0f172a,stroke:#f97316,color:#fff
+```
+
+## 🌟 Vision
 
 FINOVA transforms organizational financial data into intelligent, explainable and actionable decisions.
 
 Built with ❤️ by Neuronauts in ZENESIS 12 hours Hackathon
-🚀 FINOVA
+
+## 🚀 FINOVA
 
 Finance + Innovation + Intelligence
