@@ -274,6 +274,49 @@ Action / Notification
         ↓                           ↓
  Historical Analysis        Recommendations
 ```
+
+## enterprise-grade ERP & NetSuite modules 
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           FINOVA AI INTELLIGENCE LAYER                         │
+│  [Gemini 2.0 Vision Extraction] → [3-Way PO/GRN Match] → [Price-Drift Engine]   │
+└──────────────────────────────────────┬──────────────────────────────────────────┘
+                                       │
+                      Bi-directional SuiteTalk REST API
+                                       ↓
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                      ORACLE NETSUITE / ERP INTEGRATION ENGINE                   │
+│                                                                                 │
+│  1. 🔄 2-Way Record Sync:                                                       │
+│     FINOVA Invoice      ⇄  NetSuite VendorBill (VB-10928)                       │
+│     FINOVA PO           ⇄  NetSuite PurchaseOrder (PO-8419)                     │
+│     FINOVA Receipt/GRN  ⇄  NetSuite ItemReceipt (IR-5521)                       │
+│     FINOVA Expense      ⇄  NetSuite ExpenseReport (EXP-3012)                    │
+│                                                                                 │
+│  2. 📑 Double-Entry General Ledger (GL) Auto-Mapping:                           │
+│     Auto-categorizes invoices into NetSuite Chart of Accounts:                 │
+│     • DR (Debit):  GL-60100 (IT & Software Expense)    ₹4,250.00                │
+│     • CR (Credit): GL-20000 (Accounts Payable Control) ₹4,250.00                │
+│     Allocates NetSuite Dept-10 (Engineering), Class-PROD, and Location-HQ.      │
+│                                                                                 │
+│  3. 📊 Real-Time Budgetary Commitment & Encumbrance Engine:                     │
+│     Pre-encumbrance verification checking available fiscal funds before PO/Bill │
+│     commitments to eliminate unexpected budget overruns.                        │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+## 🔒 How Security & Authentication Work
+
+[ Browser Client ]
+       │  JWT Bearer Token (Supabase Auth)
+       ↓
+[ FastAPI Backend ]
+       │  API Secrets isolated in Server Memory (.env)
+       ├─────────────────────────┬─────────────────────────┐
+       ↓                         ↓                         ↓
+[ Supabase PostgreSQL ]    [ Gemini 2.0 AI ]      [ Oracle NetSuite ]
+ Row-Level Security (RLS)   Google GenAI SDK       Token-Based Auth (TBA)
+ & Encrypted Storage        Encrypted Transit      OAuth 1.0a HMAC-SHA256
+ 
+
 🌟 Vision
 
 FINOVA transforms organizational financial data into intelligent, explainable and actionable decisions.
