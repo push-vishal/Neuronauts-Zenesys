@@ -220,6 +220,19 @@ FINOVA is built to serve:
           │            │  │  Python / SQL│  │     Alerts     │
           └────────────┘  └──────────────┘  └────────────────┘
 ```
+**Automation Architecture:**
+Invoice / Expense Event
+        ↓
+       n8n
+        ↓
+Validation
+        ↓
+Database
+        ↓
+AI Analysis
+        ↓
+Action / Notification
+
 
 **Stack overview:**
 
