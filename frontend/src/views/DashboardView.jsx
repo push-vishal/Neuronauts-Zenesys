@@ -7,21 +7,24 @@ export default function DashboardView({ onNavigate }) {
   const [projectsData, setProjectsData] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
+  const [invoices, setInvoices] = useState([]);
 
   useEffect(() => {
     let ignore = false;
     const fetchDashboardData = async () => {
       try {
-        const [projRes, anaRes, recRes] = await Promise.all([
+        const [projRes, anaRes, recRes, invRes] = await Promise.all([
           axios.get('/api/v1/projects/').catch(() => ({ data: { projects: [] } })),
           axios.get('/api/v1/analytics/').catch(() => ({ data: null })),
-          axios.get('/api/v1/recommendations/').catch(() => ({ data: { recommendations: [] } }))
+          axios.get('/api/v1/recommendations/').catch(() => ({ data: { recommendations: [] } })),
+          axios.get('/api/v1/invoices/').catch(() => ({ data: { invoices: [] } }))
         ]);
 
         if (!ignore) {
           setProjectsData(projRes.data);
           if (anaRes.data) setAnalyticsData(anaRes.data);
           if (recRes.data?.recommendations) setRecommendations(recRes.data.recommendations);
+          if (invRes.data?.invoices) setInvoices(invRes.data.invoices);
         }
       } catch (err) {
         console.error(err);
@@ -38,7 +41,9 @@ export default function DashboardView({ onNavigate }) {
   const totalSpend = analyticsData?.total_spend || projectsData?.total_spend || 0;
   const totalBudget = analyticsData?.total_budget || projectsData?.total_budget || 0;
   const overbudgetCount = projectsData?.overbudget_projects_count || 0;
-  const outstandingPayables = 4250.00;
+  const outstandingPayables = invoices
+    .filter(i => (i.payment_status || 'Pending') === 'Pending')
+    .reduce((sum, i) => sum + (parseFloat(i.total_amount) || 0), 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

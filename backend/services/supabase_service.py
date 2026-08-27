@@ -295,7 +295,7 @@ class SupabaseDatabaseService:
     def get_recommendations(cls) -> List[Dict[str, Any]]:
         recommendations = []
 
-        # 1. Check all invoices for price drift anomalies
+        # 1. Check all invoices for genuine price drift anomalies
         for inv in cls._invoices:
             for anom in inv.get("anomalies", []):
                 if anom.get("type") == "PRICE_DRIFT_DETECTED":
@@ -303,34 +303,36 @@ class SupabaseDatabaseService:
                         "id": f"rec_drift_{inv.get('invoice_number')}",
                         "title": f"Vendor Price Drift Alert: {inv.get('vendor_name')}",
                         "type": "PRICE_ANOMALY",
-                        "impact": "Cost Saving Opportunity (14%)",
+                        "impact": "14% Cost Drift",
                         "what_happened": anom.get("description"),
-                        "why_it_matters": "Acme Hardware's unit laptop cost increased by 14% vs historical purchasing history (₹1,184).",
-                        "action": "Request competitive quotations from Global Tech Supplies or renegotiate terms with Acme."
+                        "why_it_matters": f"Unit pricing on invoice {inv.get('invoice_number')} is higher than verified organizational historical baseline.",
+                        "action": "Request competitive quote from alternative approved vendor or request vendor price match."
                     })
                 elif anom.get("type") == "PO_INVOICE_AMOUNT_MISMATCH":
                     recommendations.append({
                         "id": f"rec_mismatch_{inv.get('invoice_number')}",
-                        "title": f"PO / Invoice 3-Way Match Mismatch: {inv.get('invoice_number')}",
+                        "title": f"PO / Invoice 3-Way Match Variance: {inv.get('invoice_number')}",
                         "type": "AUDIT_RISK",
                         "impact": "Payment Hold Required",
                         "what_happened": anom.get("description"),
-                        "why_it_matters": f"Invoice total (₹{inv.get('total_amount'):,.2f}) exceeds authorized PO authorization.",
-                        "action": "Withhold payment approval until revised credit note or revised PO authorization is issued."
+                        "why_it_matters": f"Invoice total (₹{inv.get('total_amount', 0):,.2f}) exceeds authorized Purchase Order limit.",
+                        "action": "Withhold payment approval until revised credit note or updated PO authorization is issued."
                     })
 
         # 2. Check overbudget projects
         for p in cls._projects:
-            if p["actual_spend"] > p["budget_amount"]:
-                over = p["actual_spend"] - p["budget_amount"]
+            budget = float(p.get("budget_amount", 0))
+            actual = float(p.get("actual_spend", 0))
+            if actual > budget:
+                over = actual - budget
                 recommendations.append({
-                    "id": f"rec_budget_{p['project_code']}",
-                    "title": f"Project Budget Overrun: {p['project_name']}",
+                    "id": f"rec_budget_{p.get('project_code')}",
+                    "title": f"Budget Overrun: {p.get('project_name')}",
                     "type": "BUDGET_OVERRUN",
-                    "impact": f"Over budget by ₹{over:,.2f}",
-                    "what_happened": f"Project {p['project_code']} has exceeded its allocated budget of ₹{p['budget_amount']:,.2f}.",
-                    "why_it_matters": "Uncontrolled project cost allocations jeopardize quarterly financial margins.",
-                    "action": f"Reallocate ₹{over:,.2f} from unencumbered departmental funds or freeze non-critical expenses."
+                    "impact": f"Over by ₹{over:,.2f}",
+                    "what_happened": f"Project {p.get('project_code')} actual spend (₹{actual:,.2f}) has exceeded budget (₹{budget:,.2f}).",
+                    "why_it_matters": "Uncontrolled cost allocations directly impact department quarterly financial targets.",
+                    "action": f"Reallocate ₹{over:,.2f} from unencumbered fiscal reserves or freeze non-essential expenses."
                 })
 
         return recommendations
@@ -338,29 +340,51 @@ class SupabaseDatabaseService:
     # --- DYNAMIC ANALYTICS SUMMARY ---
     @classmethod
     def get_analytics_summary(cls) -> Dict[str, Any]:
-        total_invoice_spend = sum(inv.get("total_amount", 0) for inv in cls._invoices)
-        total_expense_spend = sum(exp.get("amount", 0) for exp in cls._expenses)
-        total_spend = total_invoice_spend + total_expense_spend
+        total_invoice_spend = sum(float(inv.get("total_amount", 0)) for inv in cls._invoices)
+        total_expense_spend = sum(float(exp.get("amount", 0)) for exp in cls._expenses)
+        total_spend = round(total_invoice_spend + total_expense_spend, 2)
 
-        total_budget = sum(p.get("budget_amount", 0) for p in cls._projects)
-        total_actual_project_spend = sum(p.get("actual_spend", 0) for p in cls._projects)
-        overbudget_count = sum(1 for p in cls._projects if p.get("actual_spend", 0) > p.get("budget_amount", 0))
+        total_budget = sum(float(p.get("budget_amount", 0)) for p in cls._projects)
+        total_actual_project_spend = sum(float(p.get("actual_spend", 0)) for p in cls._projects)
+        overbudget_count = sum(1 for p in cls._projects if float(p.get("actual_spend", 0)) > float(p.get("budget_amount", 0)))
 
-        # Categorical spend breakdown
-        categories = {
-            "Hardware & Capital Assets": 42500.0,
-            "Software & SaaS Subscriptions": 28400.0,
-            "Professional Consulting": 15000.0,
-            "Employee Travel & Claims": total_expense_spend + 2490.0
-        }
+        # Aggregate categories dynamically from genuine invoices and expenses
+        cat_map: Dict[str, float] = {}
+        for inv in cls._invoices:
+            vendor_cat = "Hardware & Capital Assets"
+            for v in cls._vendors:
+                if v["name"].lower() == inv.get("vendor_name", "").lower():
+                    vendor_cat = v.get("category", "Hardware & Capital Assets")
+                    break
+            amt = float(inv.get("total_amount", 0))
+            cat_map[vendor_cat] = round(cat_map.get(vendor_cat, 0) + amt, 2)
 
-        # Monthly Purchasing Baseline
+        for exp in cls._expenses:
+            exp_cat = f"Employee {exp.get('category', 'General')}"
+            amt = float(exp.get("amount", 0))
+            cat_map[exp_cat] = round(cat_map.get(exp_cat, 0) + amt, 2)
+
+        if not cat_map:
+            cat_map["General Procurement"] = total_spend
+
+        # Dynamic monthly aggregation from actual invoice & expense dates
+        monthly_map: Dict[str, float] = {}
+        for inv in cls._invoices:
+            date_str = inv.get("invoice_date", time.strftime("%Y-%m"))
+            month_key = date_str[:7] if len(date_str) >= 7 else time.strftime("%Y-%m")
+            monthly_map[month_key] = round(monthly_map.get(month_key, 0) + float(inv.get("total_amount", 0)), 2)
+
+        for exp in cls._expenses:
+            date_str = exp.get("date", time.strftime("%Y-%m"))
+            month_key = date_str[:7] if len(date_str) >= 7 else time.strftime("%Y-%m")
+            monthly_map[month_key] = round(monthly_map.get(month_key, 0) + float(exp.get("amount", 0)), 2)
+
         monthly_trend = [
-            {"month": "May 2026", "spend": 45000.0},
-            {"month": "Jun 2026", "spend": 58000.0},
-            {"month": "Jul 2026", "spend": 62000.0},
-            {"month": "Aug 2026", "spend": total_spend}
+            {"month": m, "spend": val} for m, val in sorted(monthly_map.items())
         ]
+
+        if not monthly_trend:
+            monthly_trend = [{"month": time.strftime("%Y-%m"), "spend": total_spend}]
 
         return {
             "status": "success",
@@ -372,6 +396,6 @@ class SupabaseDatabaseService:
             "expenses_count": len(cls._expenses),
             "vendors_count": len(cls._vendors),
             "projects_count": len(cls._projects),
-            "categories": categories,
+            "categories": cat_map,
             "monthly_trend": monthly_trend
         }
